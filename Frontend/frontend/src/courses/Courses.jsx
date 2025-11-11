@@ -5,18 +5,14 @@ import Footer from '../Component/Footer'
 import list from '../../public/list.json'
 
 function Courses() {
-  console.log(list)
   return (
-   <>
-   <div>
-    <Navbar/>
-    <div className='min-h-screen'>
-
-    <Course/>
-    </div>
-    <Footer/>
-   </div>
-   </>
+    <>
+      <Navbar/>
+      <div className="min-h-screen">
+        <Course list={list} />  {/* ✅ Pass list to Course component */}
+      </div>
+      <Footer/>
+    </>
   )
 }
 

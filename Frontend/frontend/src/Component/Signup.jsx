@@ -1,88 +1,137 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Login from "./Login";
+import React, { useState } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Signup({ onClose }) {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    fullname: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match ❌");
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:4001/user/signup", {
+        fullname: formData.fullname,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (res.data.user) {
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        toast.success("Signup Successful 🎉");
+      } else {
+        toast.success(res.data.message || "Signup Successful 🎉");
+      }
+
+      // ✅ Close modal if function exists
+      if (onClose) onClose();
+
+      // ✅ Redirect to home page after short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 500);
+
+    } catch (err) {
+      console.error("Signup Error:", err);
+      toast.error(err.response?.data?.message || "Signup failed ❌");
+    }
+  };
+
   return (
-    <>
-      {/* Background overlay */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        {/* Modal box */}
-        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-lg p-6 w-96 relative shadow-lg">
-          
-          {/* Close button */}
-          <Link to='/'
-            className="absolute top-2 right-2 text-xl font-bold hover:text-red-500"
-            onClick={onClose}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white rounded-2xl shadow-2xl p-8 w-96 relative transform transition-all duration-300 scale-100 hover:scale-[1.03]">
+        <button
+          onClick={() => onClose && onClose()}
+          className="absolute top-3 right-4 text-2xl font-bold hover:text-red-500 transition-all"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-3xl font-semibold text-center mb-6 text-pink-500">
+          Create Account 
+        </h2>
+
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+          <input
+            type="text"
+            name="fullname"
+            value={formData.fullname}
+            onChange={handleChange}
+            placeholder="Full Name"
+            required
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 outline-none dark:bg-gray-800 transition-all"
+          />
+
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email Address"
+            required
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 outline-none dark:bg-gray-800 transition-all"
+          />
+
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            required
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 outline-none dark:bg-gray-800 transition-all"
+          />
+
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password"
+            required
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 outline-none dark:bg-gray-800 transition-all"
+          />
+
+          <button
+            type="submit"
+            className="bg-pink-500 text-white rounded-lg py-2 mt-3 hover:bg-pink-600 transition-all font-semibold shadow-md"
           >
-            ✕
-          </Link>
+            Sign Up
+          </button>
+        </form>
 
-          {/* Heading */}
-          <h3 className="font-bold text-lg mb-4 text-center">Sign Up</h3>
+       <p className="text-center text-sm mt-4">
+  Already have an account?{" "}
+  <button
+    type="button"
+    className="text-pink-500 hover:underline font-medium"
+    onClick={() => {
+      onClose();  // Close signup modal
+      openLogin(); // Open login modal
+    }}
+  >
+    Login
+  </button>
+</p>
 
-          {/* Form fields */}
-          <div className="flex flex-col gap-3">
-            {/* Name */}
-            <div className="flex flex-col gap-1">
-              <label>Name</label>
-              <input
-                type="text"
-                placeholder="Enter your Name"
-                className="input input-bordered w-full px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            {/* Email */}
-            <div className="flex flex-col gap-1">
-              <label>Email</label>
-              <input
-                type="email"
-                placeholder="Enter your Email"
-                className="input input-bordered w-full px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="flex flex-col gap-1">
-              <label>Password</label>
-              <input
-                type="password"
-                placeholder="Enter your Password"
-                className="input input-bordered w-full px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div className="flex flex-col gap-1">
-              <label>Confirm Password</label>
-              <input
-                type="password"
-                placeholder="Re-enter your Password"
-                className="input input-bordered w-full px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            {/* Button */}
-            <button className="bg-pink-500 text-white rounded-md py-2 mt-3 hover:bg-pink-600 duration-200 font-semibold">
-              Sign Up
-            </button>
-
-            {/* Already have an account */}
-            <p className="text-center mt-3 text-sm">
-              Already have an account?{" "}
-              <Link
-                to="/"
-                className="text-pink-500 underline hover:text-pink-600 cursor-pointer"
-              >
-                Login
-              </Link>
-              <Login/>
-            </p>
-          </div>
-        </div>
       </div>
-    </>
+    </div>
   );
 }
 
